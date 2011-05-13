@@ -61,6 +61,7 @@ sub process_event {
 			} else {
 				$self->focused_component($self->{_text_component})
 			}
+			$self->focused_component()->update();
 		};
 		default { 
 			# delegate to focused component
