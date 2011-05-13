@@ -88,8 +88,11 @@ sub update {
 		my %opt = @_;
 		if(exists $opt{text}) {
 			my $search = $opt{text};
-			my $res = $self->{locate}->locate($search, { regexp => 1 } );
-			$self->{_list_component}->data($res);
+			my $res;
+			eval {
+				$res = $self->{locate}->locate($search, { regexp => 1 } );
+			};
+			$self->{_list_component}->data($res) if $res;
 			$self->{_list_component}->update();
 			$self->{_text_component}->update();
 		}
