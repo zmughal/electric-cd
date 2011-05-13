@@ -16,7 +16,6 @@ use constant END_POS => -1;
 sub new {
 	my $class = shift;
 	ref($class) and croak "class name needed";
-	print Dumper \@_;
 	my $self = $class->SUPER::new(@_);
 	my %opt = @_;
 	$self->{_old_scroll_pos} = -1;

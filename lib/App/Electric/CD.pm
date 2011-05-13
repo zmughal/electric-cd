@@ -6,9 +6,9 @@ use warnings;
 use App::Electric::Window;
 use Log::Log4perl;
 
-my $log_conf = q/
-	log4perl.category = INFO, Logfile
-
+#my $log_conf_debug = q/log4perl.category = INFO, Logfile/;
+my $log_conf_debug = q/log4perl.category = ERROR/;
+$log_conf_debug .= q/
 	log4perl.appender.Logfile = Log::Log4perl::Appender::File
 	log4perl.appender.Logfile.filename = debug.log
 	log4perl.appender.Logfile.mode = write
@@ -23,27 +23,8 @@ my $log_conf = q/
 	log4perl.logger.ListComponent = INFO
 /;
 
-
-#sub main {
-#        my $key;
-#        my $ticks = 0;
-#        do {
-#                $key = getch;
-#                draw_prompt();
-#        } while( !defined($key) || $key ne 'q');
-#}
-#
-#sub draw_prompt {
-#        my $prompt = $win{prompt};
-#        #$prompt->box('|', '-');
-#        $prompt->border(border_ACS());
-#        $prompt->addstr(1, 1, "Abc");
-#        $prompt->refresh;
-#}
-
 sub run {
-	#Log::Log4perl::init( \$log_conf );
-	Log::Log4perl::init( \"" );
+	Log::Log4perl::init( \$log_conf_debug );
 	die ("Need output") unless defined (my $output = shift @ARGV);
 	my $logger = Log::Log4perl::get_logger("main");
 	$logger->info("Starting window");
