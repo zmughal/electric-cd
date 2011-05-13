@@ -160,7 +160,7 @@ sub update {
 		# redraw
 		my @data = @{$self->data()};
 		$self->window()->clear();
-		for my $cur (0..$self->lines()) {
+		for my $cur (0..$self->lines()-1) {
 			my $data_pos = $self->{_scroll_pos} + $cur;
 			$self->log()->logcroak("Corruption: $data_pos is outside range") if ($data_pos < 0);
 			$self->window()->move($cur, 0);
