@@ -134,6 +134,7 @@ sub scroll_up {
 sub selection_down {
 	my $self = shift;
 	my @data = @{$self->data()};
+	return unless @data;
 	$self->{_data_pos} = ($self->{_data_pos} + 1) % @data;
 	return $self->scroll_down() if($self->{_data_pos} >=
 			$self->{_scroll_pos} + $self->lines());
@@ -143,6 +144,7 @@ sub selection_down {
 sub selection_up {
 	my $self = shift;
 	my @data = @{$self->data()};
+	return unless @data;
 	$self->{_data_pos} = (@data + $self->{_data_pos} - 1) % @data;
 	return $self->scroll_up() if($self->{_data_pos} <
 		$self->{_scroll_pos});
@@ -160,21 +162,22 @@ sub update {
 		# redraw
 		my @data = @{$self->data()};
 		$self->window()->clear();
-		for my $cur (0..$self->lines()-1) {
-			my $data_pos = $self->{_scroll_pos} + $cur;
-			$self->log()->logcroak("Corruption: $data_pos is outside range") if ($data_pos < 0);
-			$self->window()->move($cur, 0);
-			$self->window()->clrtoeol();
-			my $left_column = " ";
-			$left_column = ">" if $data_pos == $self->{_data_pos};
-			$self->window()->addstr($left_column.($data[$data_pos] // "~"));
+		if(@data) {
+			for my $cur (0..$self->lines()-1) {
+				my $data_pos = $self->{_scroll_pos} + $cur;
+				$self->log()->logcroak("Corruption: $data_pos is outside range") if ($data_pos < 0);
+				$self->window()->move($cur, 0);
+				$self->window()->clrtoeol();
+				my $left_column = " ";
+				$left_column = ">" if $data_pos == $self->{_data_pos};
+				$self->window()->addstr($left_column.($data[$data_pos] // "~"));
+			}
+			# highlight current selection _data_pos
+			my $cur_line = $self->{_data_pos} - $self->{_scroll_pos};
+			$self->window()->chgat($cur_line, 0, -1, A_BOLD , 1, 0);
 		}
-		$self->SUPER::update();
 	#}
-	# highlight current selection _data_pos
-	# TODO: get this to work
-	my $cur_line = $self->{_data_pos} - $self->{_scroll_pos};
-	$self->window()->chgat($cur_line, 0, -1, A_BOLD , 1, 0);
+	$self->SUPER::update();
 	$self->WINCH(0);
 	$self->{_old_scroll_pos} = $self->{_scroll_pos};
 }
