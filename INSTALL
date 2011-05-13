@@ -1,0 +1,9 @@
+Perl >= 5.010
+
+CPAN packages:
+Curses
+	apt-get install libcurses-perl
+Log::Log4perl
+	apt-get install liblog-log4perl-perl
+File::Locate::Harder
+	this requires a locate utility
