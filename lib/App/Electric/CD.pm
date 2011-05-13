@@ -6,12 +6,16 @@ use warnings;
 use App::Electric::Window;
 use Log::Log4perl;
 
-#my $log_conf_debug = q/log4perl.category = INFO, Logfile/;
-my $log_conf_debug = q/log4perl.category = ERROR/;
-$log_conf_debug .= q/
+#my $log_file = 'debug.log';
+my $log_file = '/dev/null';
+
+my $log_conf_debug = qq/
+	log4perl.category = INFO, Logfile
+
 	log4perl.appender.Logfile = Log::Log4perl::Appender::File
-	log4perl.appender.Logfile.filename = debug.log
+	log4perl.appender.Logfile.filename = $log_file
 	log4perl.appender.Logfile.mode = write
+	log4perl.appender.Logfile.create_at_logtime = false
 	log4perl.appender.Logfile.layout = Log::Log4perl::Layout::PatternLayout
 	log4perl.appender.Logfile.layout.ConversionPattern = %d %p> %m (%M)%n
 
