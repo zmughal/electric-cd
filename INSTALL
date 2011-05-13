@@ -7,3 +7,5 @@ Log::Log4perl
 	apt-get install liblog-log4perl-perl
 File::Locate::Harder
 	this requires a locate utility
+String::ShellQuote
+	apt-get install libstring-shellquote-perl

@@ -9,6 +9,8 @@ use List::Util qw/min max sum/;
 use Log::Log4perl;
 use Carp;
 use IO::File;
+use String::ShellQuote;
+use File::Basename;
 
 use Data::Dumper;
 
@@ -40,10 +42,23 @@ sub mainloop {
 		) unless ord($key) == -1;
 	} while( defined($key) && $self->{_running} );
 	cleanup(); # done
-	if(exists $self->{selected}) {
+	if($self->{selected}) {
 		my $fh = $self->{_output};
-		print $fh "$self->{selected}\n";
+		print $fh "#!$ENV{SHELL}\n";
+		my $dir = $self->get_dir($self->{selected});
+		printf $fh "cd %s\n", shell_quote($dir);
 		$self->{_output}->close;
+	}
+}
+
+sub get_dir {
+	my $self = shift;
+	my $file = shift;
+	if( -d $file && -r $file ) {
+		return $file;
+	} else {
+		my ($name,$path,$suffix) = fileparse($file);
+		return $path;
 	}
 }
 
