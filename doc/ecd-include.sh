@@ -3,8 +3,8 @@ function cde {
 	GO="$HOME/bin/ecd.go"
 	rm "$GO" 2>/dev/null
 	ecd.exec "$GO"
-	pushd .
 	if [ -r "$GO" ]; then
+		pushd .
 		. "$GO"
 	fi
 }
