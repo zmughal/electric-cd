@@ -138,7 +138,7 @@ sub selection_down {
 	$self->{_data_pos} = ($self->{_data_pos} + 1) % @data;
 	return $self->scroll_down() if($self->{_data_pos} >=
 			$self->{_scroll_pos} + $self->lines());
-	return $self->home(1) if($self->{_data_pos} == 0);
+	return $self->home(1) if($self->home());
 }
 
 sub selection_up {
@@ -148,7 +148,7 @@ sub selection_up {
 	$self->{_data_pos} = (@data + $self->{_data_pos} - 1) % @data;
 	return $self->scroll_up() if($self->{_data_pos} <
 		$self->{_scroll_pos});
-	return $self->end(1) if($self->{_data_pos} == $#data);
+	return $self->end(1) if($self->end());
 }
 
 sub selected {
