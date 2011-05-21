@@ -1,10 +1,10 @@
 package App::Electric::ListComponent;
-use base ("App::Electric::Component");
+use 5.010;
+use parent ("App::Electric::Component");
 
 use strict;
 use warnings;
 
-use 5.010;
 use Curses;
 use Carp;
 use List::Util qw/min max/;
