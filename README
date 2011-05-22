@@ -10,3 +10,12 @@ if [ -r "$HOME/sw_projects/electric-cd/electric-cd/doc/ecd-include.sh" ]; then
 	. "/path/to/electric-cd/doc/ecd-include.sh"
 fi
 ---
+
+Usage:
+The top portion of the screen is the editing component. You can start typing
+and use the backspace, delete, and arrow keys, as wells as Ctrl-U and Ctrl-K.
+
+The bottom portion is the list component. You can use the arrow keys to
+navigate, as well as j/k like vi. Use Enter/Return to select an item.
+
+To switch between the components use the Tab key.
