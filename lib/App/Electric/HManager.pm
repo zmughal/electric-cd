@@ -29,6 +29,7 @@ sub new {
 	$self;
 }
 
+# either initialize the components or update the size
 sub components_init {
 	my $self = shift;
 	my ($lines, $columns) = @{$self->size()};
@@ -40,28 +41,31 @@ sub components_init {
 		my $list_window = derwin( $self->window(), $list_lines, $columns, $text_lines, 0);
 		$self->{_text_component} = App::Electric::EditingComponent->new( window => $text_window );
 		$self->{_list_component} = App::Electric::ListComponent->new( window => $list_window );
+		$self->{_component_init} = 1; # the components have be initialized once
 	} else {
+		$self->log()->info("Setting text component to [$text_lines, $columns]");
 		$self->{_text_component}->size( $text_lines, $columns );
+		$self->log()->info("Setting list component to [$list_lines, $columns]");
 		$self->{_list_component}->size( $list_lines, $columns );
 	}
 }
 
 sub process_event {
 	my $self = shift;
+	no warnings 'numeric';
 	my %opt = @_;
-	$self->log()->info("Processing event ", $opt{keypress});
+	$self->log()->info("Processing event ", $opt{keypress}) unless $opt{keypress} == -1;
 	$self->_check_process_event_opt(%opt);
 	given($opt{keypress}) {
+		when( unctrl($_) eq '^L') {
+			$self->update_components();
+		}
+		when( -1 ) { return; }
 		when(ord($_) == KEY_ESCAPE) { $opt{callback}->stop(); }
+		when( KEY_RESIZE ) { $self->update_components(); }
 		when( $_ eq "\t" ) {
 			# toggle
-			if($self->focused_component() == $self->{_text_component})
-			{
-				$self->focused_component($self->{_list_component})
-			} else {
-				$self->focused_component($self->{_text_component})
-			}
-			$self->focused_component()->update();
+			$self->toggle_focus();
 		};
 		default { 
 			# delegate to focused component
@@ -70,19 +74,31 @@ sub process_event {
 	}
 }
 
+sub toggle_focus {
+	my $self = shift;
+	if($self->focused_component() == $self->{_text_component})
+	{
+		$self->focused_component($self->{_list_component})
+	} else {
+		$self->focused_component($self->{_text_component})
+	}
+	$self->focused_component()->update();
+}
+
 sub focus {
 	my $self = shift;
-	$self->focused_component($self);
-	$self->SUPER::focus(1);
+	$self->focused_component()->focus(@_);
+	$self->SUPER::focus(@_);
 }
 
 sub update {
 	my $self = shift;
 	if($self->WINCH()) {
 		# reinit window sizes of components
+		$self->log()->info("The size has changed to @{$self->size()}");
 		$self->components_init();
-		$self->{_text_component}->update();
-		$self->{_list_component}->update();
+		$self->update_components();
+		$self->SUPER::update();
 		$self->WINCH(0); # turn off flag for next time
 	} else {
 		$self->focused_component()->update();
@@ -94,8 +110,7 @@ sub update {
 				$res = $self->{locate}->locate($search, { regexp => 1 } );
 			};
 			$self->{_list_component}->data($res) if $res;
-			$self->{_list_component}->update();
-			$self->{_text_component}->update();
+			$self->update_components();
 		}
 		# TODO if the change is in the text component pipe the text
 		# editor string  into the query and set the listcompent data
@@ -103,6 +118,14 @@ sub update {
 		# or if the change is in the list component then perform the
 		# action in the controller, e.g. selection
 	}
+}
+
+sub update_components {
+	my $self = shift;
+	$self->{_list_component}->window()->touchwin();
+	$self->{_list_component}->update();
+	$self->{_text_component}->window()->touchwin();
+	$self->{_text_component}->update();
 }
 
 sub focused_component {

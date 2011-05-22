@@ -31,11 +31,23 @@ sub new {
 
 sub mainloop {
 	my $self = shift;
+	no warnings 'numeric';
 	$self->{_log}->info("Starting mainloop");
 	$self->{_running} = 1;
 	my $key;
 	do {
+		# TODO: This may be better done using wgetch for ncurses state
 		$key = getch;
+		if($self->{_HACK_RESIZE}) {
+			# I'm not exactly sure why I need to do this :-/ .
+			# Internal state for ncurses?
+			$self->{_focused_component}->process_event(
+				callback => $self,
+				keypress => KEY_RESIZE
+			);
+			$self->{_HACK_RESIZE} = 0;
+		}
+		$self->resized() if $key == KEY_RESIZE;
 		$self->{_focused_component}->process_event(
 			callback => $self,
 			keypress => $key
@@ -81,7 +93,7 @@ sub init {
 	noecho;
 	cbreak;
 	keypad(1);
-	#nodelay(1);
+	nodelay(1);
 	#$self->_init_win();
 
 	my ($maxy, $maxx);
@@ -89,14 +101,19 @@ sub init {
 	my $window = newwin($maxy, $maxx, 0, 0);
 
 	my $hmanager = App::Electric::HManager->new( window => $window, );
-	$self->{_log}->info(Dumper $hmanager->size());
-	$self->{_log}->info(Dumper $hmanager->pos());
+	$self->{_log}->info("Size: @{$hmanager->size()}");
+	$self->{_log}->info("Pos: @{$hmanager->pos()}");
 	$self->{_focused_component} = $hmanager;
-	$SIG{ WINCH } = sub {
-		getmaxyx($maxy, $maxx);
-		$self->{_focused_component}->size($maxy,$maxy);
-		$self->{_focused_component}->update();
-	};
+}
+
+sub resized {
+	my $self = shift;
+	my ($ny, $nx);
+	stdscr()->getmaxyx($ny, $nx);
+	$self->{_log}->info("SIGWINCH: The size has changed to [$ny, $nx]");
+	$self->{_focused_component}->size($ny,$nx);
+	$self->update();
+	$self->{_HACK_RESIZE} = 1;	# see mainloop()
 }
 
 sub stop {

@@ -105,10 +105,13 @@ sub delete_char_left {
 	my $text = $self->text();
 	my $pos = $self->{_data_pos} == END_POS ? length($text) : $self->{_data_pos};
 	unless($pos == 0) {
+		my $del = substr $self->{_text}, $pos-1, 1;
 		substr($self->{_text}, $pos-1, 1) = "";
 		$self->{_data_pos}-- unless $self->{_data_pos} == END_POS;
 		$self->{_old_scroll_pos} = -1;
+		return $del
 	}
+	return 0;
 }
 
 sub delete_to_eol {
@@ -166,15 +169,15 @@ sub process_event {
 
 sub update {
 	my $self = shift;
-	#if($self->WINCH() || $self->{_old_scroll_pos} != $self->{_scroll_pos}) {
-		$self->window()->clear();
-		my $columns = $self->canvas_columns();
-		my $cur_col = $self->{_data_pos} - $self->{_scroll_pos};
-		my $string = substr $self->text(), $self->{_scroll_pos}, $columns;
-		$self->window()->addstr(0,0, $string);
-		$self->window()->move(0, $cur_col);
-		$self->SUPER::update();
-	#}
+
+	$self->window()->clear();
+	my $columns = $self->canvas_columns();
+	my $cur_col = $self->{_data_pos} - $self->{_scroll_pos};
+	my $string = substr $self->text(), $self->{_scroll_pos}, $columns;
+	$self->window()->addstr(0,0, $string);
+	$self->window()->move(0, $cur_col);
+	$self->SUPER::update();
+
 	$self->WINCH(0);
 	$self->{_old_scroll_pos} = $self->{_scroll_pos};
 }
@@ -216,8 +219,8 @@ sub process_key {
 			$self->delete_char_right();
 		}
 		when( KEY_BACKSPACE ) {
-			$self->delete_char_left();
-			$self->log()->info("Deleting character $_");
+			my $del = $self->delete_char_left();
+			$self->log()->info("Deleting character $del") if $del;
 		}
 		when( $_ ~~ KEY_UP || $_ ~~ KEY_HOME ) {
 			$self->home();

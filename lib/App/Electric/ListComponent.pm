@@ -158,25 +158,28 @@ sub selected {
 
 sub update {
 	my $self = shift;
-	#if($self->WINCH() || $self->{_old_scroll_pos} != $self->{_scroll_pos}) {
-		# redraw
-		my @data = @{$self->data()};
-		$self->window()->clear();
-		if(@data) {
-			for my $cur (0..$self->lines()-1) {
-				my $data_pos = $self->{_scroll_pos} + $cur;
-				$self->log()->logcroak("Corruption: $data_pos is outside range") if ($data_pos < 0);
-				$self->window()->move($cur, 0);
-				$self->window()->clrtoeol();
-				my $left_column = " ";
-				$left_column = ">" if $data_pos == $self->{_data_pos};
-				$self->window()->addstr($left_column.($data[$data_pos] // "~"));
-			}
-			# highlight current selection _data_pos
-			my $cur_line = $self->{_data_pos} - $self->{_scroll_pos};
-			$self->window()->chgat($cur_line, 0, -1, A_BOLD , 1, 0);
+	my $cur_line = $self->{_data_pos} - $self->{_scroll_pos};
+	if($self->WINCH() && $cur_line >= $self->lines()) {
+		$self->{_scroll_pos} = $self->{_data_pos};
+	}
+
+	# redraw
+	my @data = @{$self->data()};
+	$self->window()->clear();
+	if(@data) {
+		for my $cur (0..$self->lines()-1) {
+			my $data_pos = $self->{_scroll_pos} + $cur;
+			$self->log()->logcroak("Corruption: $data_pos is outside range") if ($data_pos < 0);
+			$self->window()->move($cur, 0);
+			$self->window()->clrtoeol();
+			my $left_column = " ";
+			$left_column = ">" if $data_pos == $self->{_data_pos};
+			$self->window()->addstr($left_column.($data[$data_pos] // "~"));
 		}
-	#}
+		# highlight current selection _data_pos
+		$self->window()->chgat($cur_line, 0, -1, A_BOLD , 1, 0);
+	}
+
 	$self->SUPER::update();
 	$self->WINCH(0);
 	$self->{_old_scroll_pos} = $self->{_scroll_pos};

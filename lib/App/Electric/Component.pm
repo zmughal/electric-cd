@@ -69,6 +69,7 @@ sub size {
 	my $self = shift;
 	if(@_) {
 		$self->WINCH(1);
+		$self->log()->info("Size: [@{$self->size()}] -> [@_]");
 		$self->window()->resize($_[0], $_[1]);
 	} else {
 		my ($lines, $columns);

@@ -1,0 +1,13 @@
+TODO 
+
+* Add symbols to LHS of list to jump to specific item
+* Take input from @ARGV as the initial search string
+* check why it crashes when switching back and forth from a large window to a
+  really small window repeatedly
+* Optimize the drawing routines (may require rewrite of callbacks)
+* Place getch in appropriate window instead of stdscr
+* Use a separate process/thread to produce data in a non-blocking manner
+  (callbacks)
+* Find out why the _HACK_RESIZE is needed and remove if possible
+* Cleaner logging (e.g. debug option)
+* Add switching of searching methods
