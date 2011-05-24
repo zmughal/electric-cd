@@ -5,7 +5,7 @@ Initial release: works-for-me version
 To use add something similar to the following to your shell
 ---
 # ecd
-if [ -r "$HOME/sw_projects/electric-cd/electric-cd/doc/ecd-include.sh" ]; then
+if [ -r "/path/to/electric-cd/doc/ecd-include.sh" ]; then
 	export PATH="$PATH:/path/to/electric-cd/bin"
 	. "/path/to/electric-cd/doc/ecd-include.sh"
 fi

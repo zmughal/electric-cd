@@ -61,7 +61,8 @@ sub process_key {
 						my $target_data = $self->{_scroll_pos} + $sym_pos[0];
 						if($self->current_line() == $sym_pos[0]) {
 							$self->select(1);
-						} elsif($target_data < @{$self->data()}) {
+						} elsif($target_data < @{$self->data()} &&
+								$target_data <= $self->last_data_position_on_screen() ) {
 							$self->{_data_pos} = $target_data;
 						}
 					}
@@ -138,6 +139,11 @@ sub scroll_down {
 			$dp < $self->{_scroll_pos} + $self->lines());
 }
 
+sub last_data_position_on_screen {
+	my $self = shift;
+	return min( $self->{_scroll_pos} + $self->lines() - 1, $#{$self->data()} );
+}
+
 sub scroll_up {
 	my $self = shift;
 	my @data = @{$self->data()};
@@ -208,7 +214,7 @@ sub update {
 			$self->window()->clrtoeol();
 			my $left_column = " ";
 			my $arrow = " ";
-			$left_column = $symbol_list[$cur] if($cur < @data && $cur < @symbol_list);
+			$left_column = $symbol_list[$cur] if($data_pos < @data && $cur < @symbol_list);
 			$arrow = ">" if $data_pos == $self->{_data_pos};
 			$self->window()->addstr("$left_column$arrow".($data[$data_pos] // "~"));
 		}
