@@ -61,8 +61,7 @@ sub process_key {
 						my $target_data = $self->{_scroll_pos} + $sym_pos[0];
 						if($self->current_line() == $sym_pos[0]) {
 							$self->select(1);
-						} elsif($target_data < @{$self->data()} &&
-								$target_data <= $self->last_data_position_on_screen() ) {
+						} elsif( $target_data <= $self->last_data_position_on_screen() ) {
 							$self->{_data_pos} = $target_data;
 						}
 					}
