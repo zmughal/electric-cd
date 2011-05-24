@@ -10,6 +10,10 @@ use Carp;
 use List::Util qw/min max/;
 use Data::Dumper;
 
+our @symbol_list = ( ('a'..'z'), ('A' .. 'Z'), ('1' .. '9'), '0');
+our $reserved = qr/[jk]/;
+@symbol_list = grep { $_ !~ /$reserved/ } @symbol_list;
+
 sub new {
 	my $class = shift;
 	ref($class) and croak "class name needed";
@@ -28,7 +32,7 @@ sub process_event {
 	my %opt = @_;
 	$self->process_key($opt{keypress});
 	my %callback_opt;
-	$callback_opt{selected} = $self->selected() if exists $self->{_selected};
+	$callback_opt{selected} = $self->selected() if $self->select();
 	$opt{callback}->update(%callback_opt);
 }
 
@@ -37,7 +41,7 @@ sub process_key {
 	my $keypress = shift;
 	given($keypress) {
 		when( ord($_) == 10 ) {
-			$self->{_selected} = 1;
+			$self->select(1);
 		}
 		when ( $_ !~ /\d{2,}/ ) {
 			my $char = unctrl($_);
@@ -47,6 +51,20 @@ sub process_key {
 				}
 				when('k') {
 					$self->selection_up();
+				}
+				default {
+					my $search_sym = $_;
+					my @sym_pos = grep
+						{ $search_sym eq $symbol_list[$_] }
+						0..$#symbol_list;
+					if(@sym_pos) {
+						my $target_data = $self->{_scroll_pos} + $sym_pos[0];
+						if($self->current_line() == $sym_pos[0]) {
+							$self->select(1);
+						} elsif($target_data < @{$self->data()}) {
+							$self->{_data_pos} = $target_data;
+						}
+					}
 				}
 			}
 		}
@@ -151,14 +169,30 @@ sub selection_up {
 	return $self->end(1) if($self->end());
 }
 
+# select the item
+# this will be sent to the callback if it is true
+sub select {
+	my $self = shift;
+	if(@_) {
+		$self->{_selected} = $_[0];
+	}
+	$self->{_selected};
+}
+
+# returns the currently selected item
 sub selected {
 	my $self = shift;
 	return $self->data()->[$self->{_data_pos}];
 }
 
+sub current_line {
+	my $self = shift;
+	return $self->{_data_pos} - $self->{_scroll_pos};
+}
+
 sub update {
 	my $self = shift;
-	my $cur_line = $self->{_data_pos} - $self->{_scroll_pos};
+	my $cur_line = $self->current_line();
 	if($self->WINCH() && $cur_line >= $self->lines()) {
 		$self->{_scroll_pos} = $self->{_data_pos};
 	}
@@ -173,8 +207,10 @@ sub update {
 			$self->window()->move($cur, 0);
 			$self->window()->clrtoeol();
 			my $left_column = " ";
-			$left_column = ">" if $data_pos == $self->{_data_pos};
-			$self->window()->addstr($left_column.($data[$data_pos] // "~"));
+			my $arrow = " ";
+			$left_column = $symbol_list[$cur] if($cur < @data && $cur < @symbol_list);
+			$arrow = ">" if $data_pos == $self->{_data_pos};
+			$self->window()->addstr("$left_column$arrow".($data[$data_pos] // "~"));
 		}
 		# highlight current selection _data_pos
 		$self->window()->chgat($cur_line, 0, -1, A_BOLD , 1, 0);

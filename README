@@ -13,9 +13,13 @@ fi
 
 Usage:
 The top portion of the screen is the editing component. You can start typing
-and use the backspace, delete, and arrow keys, as wells as Ctrl-U and Ctrl-K.
+and use the backspace, delete, and arrow keys, as well as Ctrl-U and Ctrl-K.
 
 The bottom portion is the list component. You can use the arrow keys to
 navigate, as well as j/k like vi. Use Enter/Return to select an item.
+
+When using the list component, one can use the symbols indicated in the left
+side of screen to jump to a specific line. If that line is already highlighted,
+then it will be selected.
 
 To switch between the components use the Tab key.

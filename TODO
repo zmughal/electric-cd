@@ -1,6 +1,5 @@
 TODO 
 
-* Add symbols to LHS of list to jump to specific item
 * Take input from @ARGV as the initial search string
 * check why it crashes when switching back and forth from a large window to a
   really small window repeatedly
