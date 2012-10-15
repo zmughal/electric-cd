@@ -103,7 +103,7 @@ sub update {
 	} else {
 		$self->focused_component()->update();
 		my %opt = @_;
-		if(exists $opt{text}) {
+		if(exists $opt{text} and length $opt{text} > 4) {
 			my $search = $opt{text};
 			my $res;
 			eval {
